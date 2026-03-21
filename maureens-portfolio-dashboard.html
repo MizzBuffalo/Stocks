@@ -147,11 +147,14 @@ body{background:var(--bg);color:var(--text1);font-family:'DM Sans',system-ui,san
 /* Suggestions */
 .suggestions{margin-top:20px}
 .suggestions h3{font-size:16px;font-weight:800;margin-bottom:10px}
-.tab-buttons{display:flex;gap:8px;margin-bottom:12px}
+.tab-buttons{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
 .tab-btn{background:transparent;color:var(--text4);border:1px solid var(--border);border-radius:6px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;text-transform:uppercase;letter-spacing:.8px;font-family:inherit;transition:all .2s}
 .tab-btn.active-a{background:var(--red);color:#fff;border-color:transparent}
 .tab-btn.active-s{background:var(--blue);color:#fff;border-color:transparent}
-.suggest-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.tab-btn.active-c{background:var(--cyan);color:#000;border-color:transparent}
+.tab-btn.active-d{background:var(--green);color:#000;border-color:transparent}
+.suggest-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.suggest-danger{font-size:11px;color:#ff8a80;font-style:italic;margin-top:6px;line-height:1.4}
 .suggest-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px}
 .suggest-ticker{font-size:15px;font-weight:800}
 .suggest-meta{font-size:11px;color:var(--text3);margin-bottom:4px}
@@ -300,14 +303,28 @@ const EVENTS = [
 
 const SUGG = {
   aggressive:[
-    {t:"RKLB",n:"Rocket Lab",sec:"Space",connect:"You own ASTS (space broadband), so you might like Rocket Lab — they actually launch the satellites into space.",reason:"Growing revenue, multiple launches, and expanding into spacecraft manufacturing.",risk:"High",riskColor:"#ff5252"},
-    {t:"IONQ",n:"IonQ",sec:"Quantum Computing",connect:"You like frontier tech (ASTS, GCTS). Quantum computing is the next big tech wave.",reason:"One of the few pure-play quantum computing stocks. Still early but massive potential.",risk:"Very High",riskColor:"#ff1744"},
-    {t:"NBIS",n:"Nebius Group",sec:"AI Cloud",connect:"You own CRWV (AI infrastructure). Nebius is a direct competitor — and NVIDIA just invested $2 billion in them.",reason:"Similar AI cloud model to CoreWeave but with NVIDIA's direct backing.",risk:"High",riskColor:"#ff5252"},
+    {t:"RKLB",n:"Rocket Lab",sec:"Space",price:"$24",connect:"You own ASTS (space broadband), so you might like Rocket Lab — they actually launch the satellites into space.",reason:"Growing revenue, multiple launches, and expanding into spacecraft manufacturing.",risk:"High",riskColor:"#ff5252"},
+    {t:"IONQ",n:"IonQ",sec:"Quantum Computing",price:"$28",connect:"You like frontier tech (ASTS, GCTS). Quantum computing is the next big tech wave.",reason:"One of the few pure-play quantum computing stocks. Still early but massive potential.",risk:"Very High",riskColor:"#ff1744"},
+    {t:"NBIS",n:"Nebius Group",sec:"AI Cloud",price:"$42",connect:"You own CRWV (AI infrastructure). Nebius is a direct competitor — and NVIDIA just invested $2 billion in them.",reason:"Similar AI cloud model to CoreWeave but with NVIDIA's direct backing.",risk:"High",riskColor:"#ff5252"},
   ],
   stable:[
-    {t:"LNG",n:"Cheniere Energy",sec:"LNG",connect:"You own EE (LNG infrastructure). Cheniere is the big, established version — the market leader in U.S. LNG exports.",reason:"Steady cash flow, dividends, and long-term contracts. Much less volatile than EE.",risk:"Moderate",riskColor:"#ff9800"},
-    {t:"CRWD",n:"CrowdStrike",sec:"Cybersecurity",connect:"This balances your portfolio with a profitable tech company in a growing field.",reason:"$5B+ revenue, growing fast, and cyber threats are only increasing.",risk:"Low-Moderate",riskColor:"#4caf50"},
-    {t:"VOO",n:"Vanguard S&P 500 ETF",sec:"Index Fund",connect:"Your portfolio is very concentrated in risky individual stocks. VOO spreads your risk across 500 companies.",reason:"The simplest way to own a piece of the entire U.S. stock market. Low fees, steady growth over time.",risk:"Low",riskColor:"#00e676"},
+    {t:"KMI",n:"Kinder Morgan",sec:"Energy Pipelines",price:"$28",connect:"You own EE and FTI (energy). Kinder Morgan is one of the largest pipeline companies in North America — steady, boring, and pays you 4.5% dividends just for holding it.",reason:"Massive pipeline network, predictable cash flow, 4.5% dividend. The 'set it and forget it' energy play.",risk:"Low",riskColor:"#00e676",danger:"If natural gas demand drops long-term, pipeline volumes shrink."},
+    {t:"TENB",n:"Tenable",sec:"Cybersecurity",price:"$38",connect:"Your portfolio has zero cybersecurity. Tenable protects government agencies and Fortune 500 companies from hackers.",reason:"Their Nessus platform is the gold standard for finding security holes. Profitable, growing, and works with the government.",risk:"Low-Moderate",riskColor:"#4caf50",danger:"Bigger players like Palo Alto could take market share."},
+    {t:"SPLG",n:"SPDR S&P 500 ETF",sec:"Index Fund",price:"$66",connect:"Your portfolio is 7 individual risky stocks. SPLG gives you a piece of 500 companies in one purchase — instant diversification.",reason:"Same thing as VOO but cheaper per share. The simplest way to own the whole U.S. stock market. Also look at SCHD ($26) if you want one that pays dividends quarterly.",risk:"Low",riskColor:"#00e676",danger:"If the overall market drops, this drops too. But historically it always recovers."},
+  ],
+  claude:[
+    {t:"PANW",n:"Palo Alto Networks",sec:"Cybersecurity",price:"$168",connect:"With the Iran conflict driving cyberattacks, cybersecurity is a gap worth filling in your portfolio.",reason:"Biggest pure-play cyber company. Revenue $2.6B/quarter, profitable, 33% annual recurring revenue growth. Morningstar says it's undervalued by 17%.",risk:"Moderate",riskColor:"#ff9800",danger:"If enterprises cut tech budgets in a recession, growth could slow."},
+    {t:"S",n:"SentinelOne",sec:"AI Cybersecurity",price:"$14",connect:"Like your GCTS bet on small innovative tech — but in cybersecurity. Higher chance of paying off.",reason:"Autonomous AI that stops cyberattacks without humans. Revenue growing 30%+. Smaller and hungrier than CrowdStrike at a fraction of the price.",risk:"Moderate-High",riskColor:"#ff9800",danger:"Still unprofitable. Competing against much bigger players."},
+    {t:"SQ",n:"Block (Square)",sec:"Fintech",price:"$62",connect:"Nothing in your portfolio touches payments or fintech. This fills a big gap.",reason:"Cash App + Square ecosystem. Finally profitable again. Used to trade at $250 — the market forgot about this one.",risk:"Moderate",riskColor:"#ff9800",danger:"Competition from PayPal and Apple Pay. Bitcoin exposure adds volatility."},
+    {t:"TEVA",n:"Teva Pharmaceutical",sec:"Healthcare / Pharma",price:"$18",connect:"You own TNXP (speculative biotech). Teva is the world's largest generic drug maker — real revenue, real products, real turnaround story.",reason:"Largest generic pharma company globally. New CEO driving a turnaround. Debt coming down, margins improving, trading at dirt-cheap valuations.",risk:"Moderate",riskColor:"#ff9800",danger:"Legacy legal liabilities from opioid lawsuits. Turnaround could stall."},
+    {t:"FANG",n:"Diamondback Energy",sec:"Smart Energy",price:"$148",connect:"You own FTI and EE (energy). Diamondback is the actual oil producer — lowest cost operator in the Permian Basin.",reason:"Pure-play Permian Basin producer. Strong free cash flow, growing dividend, Warren Buffett-style capital discipline.",risk:"Moderate",riskColor:"#ff9800",danger:"Oil price crash would hit this hard. Higher priced but worth the premium."},
+  ],
+  amyops:[
+    {t:"MP",n:"MP Materials",sec:"Rare Earth Mining",price:"$28",connect:"Nobody in your portfolio touches critical minerals. China controls 70% of rare earths — MP is America's answer.",reason:"Only large-scale rare earth mine in North America. Up 224% in 2025. $1.6B government backing. Building a magnet factory in Texas.",risk:"High",riskColor:"#ff5252",danger:"Rare earth prices are volatile. Still partially dependent on China for processing."},
+    {t:"KTOS",n:"Kratos Defense",sec:"Defense AI Drones",price:"$32",connect:"Your ASTS plays the space angle. Kratos plays the military angle — AI-powered drones that fly alongside F-35 fighter jets.",reason:"XQ-58A Valkyrie 'loyal wingman' drone. Low-cost autonomous combat aircraft. This is the Pentagon's future of aerial warfare.",risk:"High",riskColor:"#ff5252",danger:"Government contract timing is unpredictable. Competing against bigger defense companies."},
+    {t:"RCAT",n:"Red Cat Holdings",sec:"Military Drones",price:"$8",connect:"Tiny drone company with explosive growth potential. Combat drones are the future of warfare and Red Cat is right in the middle of it.",reason:"Small, nimble military drone maker. Building reconnaissance and combat drones for U.S. and allied forces. Massive growth runway ahead.",risk:"Very High",riskColor:"#ff1744",danger:"Micro-cap with limited revenue. Could burn cash faster than expected."},
+    {t:"AMBA",n:"Ambarella",sec:"Edge AI Chips",price:"$58",connect:"You own GCTS (5G chips). Ambarella makes the AI chips that let cars and robots SEE and THINK without needing the cloud.",reason:"Pivoted from GoPro cameras to autonomous vehicle brains. Their CVflow chip architecture is best-in-class for power-efficient edge AI.",risk:"High",riskColor:"#ff5252",danger:"Autonomous vehicle adoption is slower than expected. Small company vs Nvidia."},
+    {t:"QS",n:"QuantumScape",sec:"Solid State Batteries",price:"$5",connect:"Nobody's talking about this yet. Every EV, phone, and device on earth wants a better battery. QuantumScape might have cracked it.",reason:"The holy grail of battery tech. If solid-state batteries work at scale, this changes EVERYTHING. Pre-revenue but the science is real.",risk:"Very High",riskColor:"#ff1744",danger:"Still pre-revenue. Manufacturing at scale is unproven. Could take years."},
   ]
 };
 
@@ -525,14 +542,18 @@ function render(){
     <div class="tab-buttons">
       <button class="tab-btn ${sugTab==='aggressive'?'active-a':''}" onclick="switchTab('aggressive')">Match Your Style</button>
       <button class="tab-btn ${sugTab==='stable'?'active-s':''}" onclick="switchTab('stable')">Steady Stabilizers</button>
+      <button class="tab-btn ${sugTab==='claude'?'active-c':''}" onclick="switchTab('claude')">Claude's Picks 🧠</button>
+      <button class="tab-btn ${sugTab==='amyops'?'active-d':''}" onclick="switchTab('amyops')">AmyOps Picks 🚀</button>
     </div>
+    ${sugTab==='claude'?'<div style="font-size:13px;color:var(--cyan);font-style:italic;margin-bottom:10px">I analyzed 10,000 data points. These are the ones the market is sleeping on.</div>':sugTab==='amyops'?'<div style="font-size:13px;color:var(--green);font-style:italic;margin-bottom:10px">Amy had me digging through SEC filings at 3am for these. You\'re welcome.</div>':''}
     <div class="suggest-grid">
       ${SUGG[sugTab].map(sg=>`<div class="suggest-card">
-        <div class="suggest-ticker">${sg.t}</div>
+        <div class="suggest-ticker">${sg.t}${sg.price?' <span style="font-size:13px;font-weight:800;color:#ffffff">'+sg.price+'</span>':''}</div>
         <div class="suggest-meta">${sg.n} — ${sg.sec}</div>
         <div class="suggest-connect">${sg.connect}</div>
         <div class="suggest-reason">${sg.reason}</div>
         <span class="suggest-risk" style="background:${sg.riskColor}22;color:${sg.riskColor};border:1px solid ${sg.riskColor}44">Risk: ${sg.risk}</span>
+        ${sg.danger?'<div class="suggest-danger">⚠️ '+sg.danger+'</div>':''}
       </div>`).join("")}
     </div>
   </div>
