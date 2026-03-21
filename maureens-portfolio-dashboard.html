@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maureen's Portfolio Intelligence</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080c14;--bg2:#0d1117;--card:#151b28;--border:#1e2740;
+  --text1:#ffffff;--text2:#c5cdd8;--text3:#a0aec0;--text4:#8b9dc3;
+  --green:#00e676;--orange:#ffb74d;--red:#ff6b6b;--blue:#448aff;--cyan:#18ffff;
+  --card-hover:#162040;--tooltip-bg:#1a2440;
+}
+.light{
+  --bg:#f5f7fa;--bg2:#ffffff;--card:#ffffff;--border:#e0e4ea;
+  --text1:#1a1a2e;--text2:#555;--text3:#777;--text4:#888;
+  --card-hover:#f0f4ff;--tooltip-bg:#333;
+}
+body{background:var(--bg);color:var(--text1);font-family:'DM Sans',system-ui,sans-serif;padding:20px 24px;min-height:100vh;transition:all .3s}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+/* Top bar */
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.topbar-right{display:flex;gap:8px}
+.toggle-btn{background:var(--card);border:1px solid var(--border);color:var(--text2);border-radius:8px;padding:6px 14px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:600;transition:all .2s}
+.toggle-btn:hover{border-color:var(--blue)}
+
+/* Header */
+.welcome{background:linear-gradient(135deg,var(--bg2),var(--card));border:1px solid var(--border);border-radius:14px;padding:22px 26px;margin-bottom:20px}
+.welcome h1{font-size:26px;font-weight:900;letter-spacing:-.5px;margin-bottom:4px}
+.welcome .intro{font-size:14px;color:var(--text2);line-height:1.6}
+.welcome .date{font-size:11px;color:var(--text4);margin-top:6px}
+
+/* Letter grade */
+.grade-card{display:flex;align-items:center;gap:16px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:20px}
+.grade-circle{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;color:#fff}
+.grade-info{flex:1}
+.grade-info .title{font-size:14px;font-weight:700;margin-bottom:4px}
+.grade-info .desc{font-size:13px;color:var(--text2);line-height:1.5}
+
+/* Overview */
+.overview-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.ov-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px}
+.ov-label{font-size:10px;color:var(--text4);text-transform:uppercase;letter-spacing:1.2px;font-weight:600}
+.ov-value{font-size:20px;font-weight:800;margin:4px 0}
+.ov-sub{font-size:11px;color:var(--text4)}
+
+/* Diversification */
+.diversification{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:20px}
+.diversification h3{font-size:16px;font-weight:800;margin-bottom:12px}
+.div-content{display:flex;gap:20px;align-items:center}
+.div-text{flex:1;font-size:13px;color:var(--text2);line-height:1.6}
+.pie-container{width:160px;height:160px;position:relative}
+
+/* Main layout */
+.main-grid{display:grid;grid-template-columns:360px 1fr;gap:18px}
+.holdings-label{font-size:10px;color:var(--text4);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;font-weight:700}
+
+/* Stock cards */
+.stock-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;margin-bottom:7px}
+.stock-card:hover{border-color:var(--blue)}
+.stock-card.selected{background:var(--card-hover);border-color:var(--blue)}
+.stock-card.selected::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--blue),var(--cyan))}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.card-ticker{font-size:15px;font-weight:800;letter-spacing:.5px}
+.card-sector{font-size:10px;color:var(--text3);margin-top:1px}
+.card-bottom{display:flex;justify-content:space-between;align-items:flex-end}
+.card-price{font-size:22px;font-weight:800}
+.card-change{font-size:12px;font-weight:600}
+.card-change.up{color:var(--green)}.card-change.down{color:var(--red)}
+.card-chartlabel{font-size:10px;color:var(--text4);margin-top:3px;text-align:right}
+
+/* Health emoji */
+.health-em{font-size:13px;font-weight:700;display:flex;align-items:center;gap:4px}
+
+/* Action badge */
+.action-badge{display:inline-block;padding:3px 10px;border-radius:4px;font-size:11px;font-weight:700;letter-spacing:.5px;margin-top:6px}
+
+/* Detail panel */
+.detail-panel{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;position:sticky;top:16px;overflow-y:auto;max-height:calc(100vh - 32px)}
+.detail-title{font-size:24px;font-weight:900;letter-spacing:-.5px}
+.detail-title span{font-size:13px;font-weight:400;color:var(--text4)}
+.detail-analogy{font-size:13px;color:var(--cyan);margin-top:4px;font-style:italic;line-height:1.5}
+.detail-simple{font-size:13px;color:var(--text2);line-height:1.5;margin-top:4px}
+.detail-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap;gap:10px}
+
+/* Metrics */
+.metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.metric-box{background:var(--bg);border-radius:8px;padding:10px;border:1px solid var(--border);position:relative}
+.metric-label{font-size:9px;color:var(--text4);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;cursor:help;border-bottom:1px dotted var(--text4)}
+.metric-value{font-size:15px;font-weight:700}
+.tooltip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:var(--tooltip-bg);color:#fff;padding:8px 12px;border-radius:6px;font-size:11px;width:200px;z-index:100;line-height:1.4;box-shadow:0 4px 12px rgba(0,0,0,.4)}
+.metric-box:hover .tooltip{display:block}
+
+/* 52-week */
+.range-section{margin-bottom:14px}
+.range-bar-wrap{position:relative;height:8px;background:var(--border);border-radius:4px;margin:6px 0}
+.range-fill{position:absolute;top:0;left:0;height:100%;background:linear-gradient(90deg,var(--blue),var(--cyan));border-radius:4px;transition:width .6s}
+.range-marker{position:absolute;top:-6px;width:4px;height:20px;background:var(--text1);border-radius:2px;transform:translateX(-50%);transition:left .6s}
+.range-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--text3)}
+.range-context{font-size:12px;color:var(--text2);margin-top:6px;font-style:italic}
+
+/* Analyst visual bar */
+.analyst-visual{margin-bottom:14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px}
+.analyst-bar-wrap{position:relative;height:10px;background:var(--border);border-radius:5px;margin:10px 0 6px}
+.analyst-you{position:absolute;top:-4px;width:6px;height:18px;background:var(--cyan);border-radius:3px;transform:translateX(-50%);transition:left .6s}
+.analyst-target{position:absolute;top:-4px;width:6px;height:18px;background:var(--green);border-radius:3px;transform:translateX(-50%);transition:left .6s}
+.analyst-labels{display:flex;justify-content:space-between;font-size:10px}
+.analyst-explain{font-size:12px;color:var(--text2);margin-top:4px}
+
+/* Best/Worst case */
+.bw-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.bw-box{border-radius:8px;padding:10px 12px}
+.bw-box.best{background:#091208;border:1px solid #1b5e2044}
+.bw-box.worst{background:#120808;border:1px solid #b71c1c33}
+.bw-label{font-size:9px;text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:4px}
+.bw-value{font-size:16px;font-weight:800}
+.bw-desc{font-size:11px;margin-top:2px}
+
+/* Good news / Watch out */
+.split-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.gn-box{background:#0a1a0e;border:1px solid #2e7d32;border-radius:8px;padding:12px}
+.gn-label{font-size:10px;color:#81c784;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700}
+.gn-item{font-size:12px;color:#c8e6c9;margin-bottom:4px;padding-left:10px;border-left:2px solid #4caf50;line-height:1.4}
+.wo-box{background:#1a0a0a;border:1px solid #c6282855;border-radius:8px;padding:12px}
+.wo-label{font-size:10px;color:#ff8a80;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700}
+.wo-item{font-size:12px;color:#ffcdd2;margin-bottom:4px;padding-left:10px;border-left:2px solid #ef5350;line-height:1.4}
+
+/* Verdict */
+.verdict-box{background:var(--bg);border-radius:8px;padding:14px;border:1px solid var(--border);margin-bottom:10px}
+.verdict-label{font-size:10px;color:var(--orange);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;font-weight:700}
+.verdict-text{font-size:14px;font-weight:600;line-height:1.5;margin-bottom:6px}
+.verdict-timing{font-size:13px;color:#ffe0a0;line-height:1.5}
+.verdict-action{margin-top:8px}
+
+/* Events */
+.events-section{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;margin-top:20px}
+.events-section h3{font-size:16px;font-weight:800;margin-bottom:12px}
+.event-row{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border)}
+.event-row:last-child{border-bottom:none}
+.event-date{min-width:80px;font-size:12px;font-weight:700;color:var(--cyan)}
+.event-ticker{min-width:50px;font-size:13px;font-weight:800}
+.event-desc{font-size:12px;color:var(--text2);flex:1}
+
+/* Suggestions */
+.suggestions{margin-top:20px}
+.suggestions h3{font-size:16px;font-weight:800;margin-bottom:10px}
+.tab-buttons{display:flex;gap:8px;margin-bottom:12px}
+.tab-btn{background:transparent;color:var(--text4);border:1px solid var(--border);border-radius:6px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;text-transform:uppercase;letter-spacing:.8px;font-family:inherit;transition:all .2s}
+.tab-btn.active-a{background:var(--red);color:#fff;border-color:transparent}
+.tab-btn.active-s{background:var(--blue);color:#fff;border-color:transparent}
+.suggest-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.suggest-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px}
+.suggest-ticker{font-size:15px;font-weight:800}
+.suggest-meta{font-size:11px;color:var(--text3);margin-bottom:4px}
+.suggest-connect{font-size:12px;color:var(--cyan);margin-bottom:4px;font-style:italic}
+.suggest-reason{font-size:12px;color:var(--text2);line-height:1.4}
+.suggest-risk{display:inline-block;padding:2px 8px;border-radius:3px;font-size:10px;font-weight:700;margin-top:6px}
+
+/* Advisor */
+.advisor-section{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;margin-top:20px}
+.advisor-section h3{font-size:16px;font-weight:800;margin-bottom:10px}
+.advisor-q{font-size:13px;color:var(--text2);padding:6px 0 6px 14px;border-left:2px solid var(--blue);margin-bottom:6px;line-height:1.5}
+
+/* Glossary */
+.glossary{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;margin-top:20px}
+.glossary h3{font-size:16px;font-weight:800;margin-bottom:10px}
+.gloss-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.gloss-item{padding:8px;background:var(--bg);border-radius:6px;border:1px solid var(--border)}
+.gloss-term{font-size:12px;font-weight:700;color:var(--cyan);margin-bottom:2px}
+.gloss-def{font-size:11px;color:var(--text2);line-height:1.4}
+
+/* Disclaimer */
+.disclaimer{margin-top:20px;padding:16px;background:var(--bg);border-radius:10px;border:1px solid var(--border)}
+.disclaimer .label{font-size:10px;color:var(--text4);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:8px;font-weight:700}
+.disclaimer p{font-size:11px;color:var(--text3);line-height:1.7}
+
+/* Print */
+@media print{
+  body{background:#fff!important;color:#111!important;padding:10px}
+  .topbar-right,.toggle-btn{display:none!important}
+  .stock-card,.detail-panel,.welcome,.grade-card,.overview-grid,.ov-card,.diversification,.events-section,.suggestions,.advisor-section,.glossary,.disclaimer,.suggest-card,.metric-box,.gn-box,.wo-box,.verdict-box,.analyst-visual,.bw-box,.bw-box.best,.bw-box.worst,.gloss-item,.event-row{background:#fff!important;border-color:#ddd!important;color:#111!important}
+  .card-ticker,.card-price,.detail-title,.ov-value,.grade-info .title,.suggest-ticker,.gloss-term,.verdict-text,.metric-value,.event-ticker,.bw-value{color:#111!important}
+  .card-sector,.card-chartlabel,.ov-label,.ov-sub,.detail-simple,.detail-analogy,.range-context,.analyst-explain,.verdict-timing,.suggest-connect,.suggest-reason,.advisor-q,.gloss-def,.disclaimer p,.grade-info .desc,.div-text,.event-desc,.event-date,.suggest-meta,.metric-label,.range-labels,.range-labels span,.bw-label,.bw-desc,.gn-label,.gn-item,.wo-label,.wo-item,.health-em,.action-badge,.analyst-labels span,.verdict-label{color:#444!important;-webkit-text-fill-color:#444!important}
+  h1,h3{-webkit-text-fill-color:#111!important;color:#111!important}
+  *{-webkit-text-fill-color:initial!important}
+  .main-grid{grid-template-columns:1fr!important}
+  .detail-panel{position:static!important}
+  .suggest-grid{grid-template-columns:1fr 1fr!important}
+  .range-fill{background:#888!important}
+  .analyst-you,.analyst-target,.range-marker{background:#333!important}
+  svg path{stroke:#fff!important}
+}
+
+@media(max-width:1024px){
+  .main-grid{grid-template-columns:1fr}.detail-panel{position:static}
+}
+@media(max-width:768px){
+  .overview-grid{grid-template-columns:repeat(2,1fr)}.metrics-grid{grid-template-columns:repeat(2,1fr)}.suggest-grid{grid-template-columns:1fr}.gloss-grid{grid-template-columns:1fr}.split-grid{grid-template-columns:1fr}.bw-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const S = [
+  {t:"ASTS",n:"AST SpaceMobile",sec:"Space / Telecom",p:94.09,pc:90.74,h52:129.89,l52:18.22,mc:"27.1B",pe:"N/A",rat:"Neutral",tgt:88.53,
+   simple:"They're building cell towers in space — literally. Their satellites let regular smartphones get service anywhere on Earth, even in the middle of the ocean.",
+   analogy:"Think of them as building the world's first cell tower that floats in space instead of standing on the ground.",
+   trend:"Space & Connectivity",
+   gn:["Signed a big deal with Canadian telecom TELUS","Won a $30M U.S. military contract","Aiming for nearly $1 billion in revenue by 2027"],
+   wo:["They're not making real money yet — still spending heavily","Launching satellites is risky and expensive","About 25% of traders are betting AGAINST this stock"],
+   health:"bullish",hs:72,ytd:1.79,y1:228,hist:[18,28,42,55,75,95,129,116,90,77,87,94],
+   verdict:"A big, exciting bet on the future of connectivity — but it's a bumpy ride.",
+   timing:"If it climbs above $120, think about selling some to lock in profits. Otherwise, hold and be patient.",
+   action:"Hold \u2014 Watch Closely",actionColor:"#ff9800",
+   bestCase:"If satellites launch on schedule → could revisit $130+ highs",worstCase:"If delays pile up → could revisit $70 range"},
+  {t:"FTI",n:"TechnipFMC",sec:"Energy Services",p:65.13,pc:64.38,h52:68.29,l52:22.12,mc:"26.5B",pe:"27.2",rat:"Strong Buy",tgt:52.00,
+   simple:"They build the underwater equipment that oil and gas companies use to drill on the ocean floor. They've been around since 1884.",
+   analogy:"Think of them as the construction company that builds highways — except their highways are pipelines on the ocean floor.",
+   trend:"Energy Infrastructure",
+   gn:["Just hit an all-time high stock price","Huge backlog of profitable projects lined up","Stock has nearly tripled in the past year"],
+   wo:["If oil prices crash, their customers spend less","Currently priced ABOVE what most analysts expected","Past issues with offshore wind projects"],
+   health:"strong-bullish",hs:88,ytd:34.1,y1:152,hist:[22,26,30,33,36,38,42,48,52,58,62,65],
+   verdict:"Your portfolio's star student. The business is genuinely strong right now.",
+   timing:"It's actually above where Wall Street thought it'd be. Consider selling some shares to lock in those big gains. Set a safety net at $55.",
+   action:"Think About Selling Some \ud83d\udcb0",actionColor:"#00e676",
+   bestCase:"Energy boom continues → $70+ is possible",worstCase:"Oil downturn → could pull back to $45-50"},
+  {t:"EE",n:"Excelerate Energy",sec:"LNG / Energy",p:33.61,pc:34.36,h52:43.18,l52:21.28,mc:"4.6B",pe:"28.1",rat:"Moderate Buy",tgt:39.00,
+   simple:"They own floating terminals that turn shipped liquid natural gas back into regular gas so countries can use it for power. They help nations get energy fast.",
+   analogy:"Imagine a giant floating gas station for entire countries — that's basically what they operate.",
+   trend:"Natural Gas & Clean Energy",
+   gn:["Record profits in 2025","Expecting even bigger profits in 2026","Expanding into Iraq and new LNG supply deals"],
+   wo:["Natural gas prices bounce around a lot","Operating in Iraq carries political risk","Recently dropped from $42 highs"],
+   health:"bullish",hs:75,ytd:19.6,y1:58,hist:[21,22,23,24,26,25,27,28,30,35,43,34],
+   verdict:"A solid, growing energy company. Not flashy, but making real money.",
+   timing:"Good hold. Analysts think it can reach $39-44. Watch for it to climb back toward its recent $43 high.",
+   action:"Keep It \u2705",actionColor:"#4caf50",
+   bestCase:"LNG demand surges → $43+ again",worstCase:"Energy prices drop → could revisit $25 area"},
+  {t:"GCTS",n:"GCT Semiconductor",sec:"5G Chips",p:1.17,pc:1.18,h52:2.47,l52:0.90,mc:"85M",pe:"-1.6",rat:"Strong Buy",tgt:4.00,
+   simple:"They design tiny computer chips that power 5G internet connections in devices like routers, hotspots, and satellite equipment.",
+   analogy:"They make the brains inside your WiFi hotspot — but for next-gen 5G and even satellite connections.",
+   trend:"5G & Satellite IoT",
+   gn:["Started shipping their first 5G chips","Partnered with Skylo for satellite connectivity","Showcased space & IoT tech at major industry show"],
+   wo:["Revenue collapsed from $9M to just $3M","Losing money with no clear path to profit yet","Tiny company — could issue more shares and dilute your value"],
+   health:"speculative",hs:32,ytd:-17,y1:-52,hist:[2.47,2.10,1.80,1.60,1.40,1.20,1.10,0.94,1.05,1.24,1.20,1.17],
+   verdict:"This is a lottery ticket. The technology is promising but the business is struggling right now.",
+   timing:"Earnings come out March 25 — that report will tell us a lot. Don't put money here you can't afford to lose.",
+   action:"Be Careful \ud83d\udea8",actionColor:"#ff5252",
+   bestCase:"5G chips take off → analysts say $3-4 possible",worstCase:"Revenue keeps falling → could drop below $1"},
+  {t:"CRWV",n:"CoreWeave",sec:"AI Cloud Computing",p:80.66,pc:82.82,h52:187.00,l52:33.52,mc:"41.6B",pe:"-31.7",rat:"Buy",tgt:120.79,
+   simple:"They rent out powerful computer hardware (GPUs) to companies building AI. Think of them as a landlord for AI computing power.",
+   analogy:"If AI is the gold rush, CoreWeave is selling the pickaxes and shovels — they provide the computing muscle.",
+   trend:"Artificial Intelligence Infrastructure",
+   gn:["Revenue exploded 168% to over $5 billion","Now powering the latest NVIDIA AI chips","Partnerships with Perplexity AI and CrowdStrike"],
+   wo:["Losing $1.2 billion per year","May need $100+ billion in funding by 2030","Big tech companies are building their own systems"],
+   health:"volatile-growth",hs:58,ytd:-2.4,y1:99,hist:[40,65,100,140,187,170,150,130,105,95,77,81],
+   verdict:"A big bet on AI's future. Revenue is skyrocketing but they're spending even faster to grow.",
+   timing:"If you believe AI is the future, hold on. If it drops below $70, that could actually be a buying opportunity.",
+   action:"Hold \u2014 Long-Term Bet",actionColor:"#ff9800",
+   bestCase:"AI boom accelerates → $120-180 range",worstCase:"Funding dries up → could revisit $50s"},
+  {t:"LVO",n:"LiveOne",sec:"Music & Entertainment",p:4.70,pc:4.50,h52:12.00,l52:2.50,mc:"52M",pe:"N/A",rat:"Buy",tgt:17.50,
+   simple:"They run a music streaming app, a podcast network (PodcastOne), and live-stream concerts. They're also using AI to cut costs dramatically.",
+   analogy:"Think of them as a scrappy mini-Spotify that also does live concerts and podcasts — now trying to use AI to run lean.",
+   trend:"Digital Music & AI Transformation",
+   gn:["Signed a big multi-year music licensing deal","Slashed staff from 350 to 84 using AI","App now available on VIZIO Smart TVs"],
+   wo:["Keeps losing money quarter after quarter","Very small company with thin trading volume","Consistently missing earnings expectations"],
+   health:"speculative",hs:35,ytd:-38,y1:-55,hist:[10.5,9,8,7,6.5,5.5,5,4,3,3.5,4,4.7],
+   verdict:"An interesting turnaround story with their AI cost-cutting, but still losing money. High risk.",
+   timing:"Watch the next 2 earnings reports. If they start turning a profit, this could really move. If not, consider cutting losses.",
+   action:"Be Careful \ud83d\udea8",actionColor:"#ff5252",
+   bestCase:"AI pivot works, profitability → analysts say $12-17",worstCase:"Losses continue → could revisit $2-3 range"},
+  {t:"TNXP",n:"Tonix Pharmaceuticals",sec:"Biotech / Pharma",p:13.24,pc:13.41,h52:69.96,l52:12.80,mc:"169M",pe:"N/A",rat:"Buy",tgt:70.00,
+   simple:"They make medicines for hard-to-treat conditions. Their big product, TONMYA, is the first new fibromyalgia drug approved in over 15 years.",
+   analogy:"They're the company that finally made a new medicine for people with fibromyalgia pain after everyone else stopped trying.",
+   trend:"Biotech & Pain Management",
+   gn:["TONMYA launched and already has ~4,200 prescriptions","1,500 doctors now prescribing it","Just upgraded to a more prestigious stock exchange listing"],
+   wo:["Losing $130 million per year","Stock has fallen 80% from its high","History of issuing new shares, which dilutes existing holders"],
+   health:"high-risk-catalyst",hs:40,ytd:-32,y1:-78,hist:[60,55,50,45,40,35,30,25,20,18,15,13],
+   verdict:"The drug is real and doctors are prescribing it — that's the good news. The bad news is the company is burning through cash fast.",
+   timing:"This is a make-or-break moment. If prescriptions keep growing fast, this could be a home run. Set a safety stop at $10 just in case.",
+   action:"Watch Closely \u26a0\ufe0f",actionColor:"#ff9800",
+   bestCase:"TONMYA takes off → analyst target is $70",worstCase:"Cash runs out or sales disappoint → $8-10 range"}
+];
+
+const EVENTS = [
+  {date:"Mar 25",ticker:"GCTS",desc:"Q4 & Full Year 2025 Earnings — Could move the stock significantly"},
+  {date:"Apr 15",ticker:"TNXP",desc:"Next prescription update expected — key indicator for TONMYA momentum"},
+  {date:"Apr 23",ticker:"FTI",desc:"Q1 2026 Earnings — Watch for continued backlog growth"},
+  {date:"May 11",ticker:"ASTS",desc:"Q1 2026 Earnings — Satellite launch updates expected"},
+  {date:"May 13",ticker:"EE",desc:"Q1 2026 Earnings — Iraq expansion progress update"},
+  {date:"Jun 9",ticker:"CRWV",desc:"Next Earnings — AI demand and profitability path update"},
+];
+
+const SUGG = {
+  aggressive:[
+    {t:"RKLB",n:"Rocket Lab",sec:"Space",connect:"You own ASTS (space broadband), so you might like Rocket Lab — they actually launch the satellites into space.",reason:"Growing revenue, multiple launches, and expanding into spacecraft manufacturing.",risk:"High",riskColor:"#ff5252"},
+    {t:"IONQ",n:"IonQ",sec:"Quantum Computing",connect:"You like frontier tech (ASTS, GCTS). Quantum computing is the next big tech wave.",reason:"One of the few pure-play quantum computing stocks. Still early but massive potential.",risk:"Very High",riskColor:"#ff1744"},
+    {t:"NBIS",n:"Nebius Group",sec:"AI Cloud",connect:"You own CRWV (AI infrastructure). Nebius is a direct competitor — and NVIDIA just invested $2 billion in them.",reason:"Similar AI cloud model to CoreWeave but with NVIDIA's direct backing.",risk:"High",riskColor:"#ff5252"},
+  ],
+  stable:[
+    {t:"LNG",n:"Cheniere Energy",sec:"LNG",connect:"You own EE (LNG infrastructure). Cheniere is the big, established version — the market leader in U.S. LNG exports.",reason:"Steady cash flow, dividends, and long-term contracts. Much less volatile than EE.",risk:"Moderate",riskColor:"#ff9800"},
+    {t:"CRWD",n:"CrowdStrike",sec:"Cybersecurity",connect:"This balances your portfolio with a profitable tech company in a growing field.",reason:"$5B+ revenue, growing fast, and cyber threats are only increasing.",risk:"Low-Moderate",riskColor:"#4caf50"},
+    {t:"VOO",n:"Vanguard S&P 500 ETF",sec:"Index Fund",connect:"Your portfolio is very concentrated in risky individual stocks. VOO spreads your risk across 500 companies.",reason:"The simplest way to own a piece of the entire U.S. stock market. Low fees, steady growth over time.",risk:"Low",riskColor:"#00e676"},
+  ]
+};
+
+const GLOSSARY = [
+  {term:"P/E Ratio",def:"Price-to-Earnings. It tells you how much investors are paying for each $1 the company earns. Lower = cheaper, higher = investors expect big growth."},
+  {term:"Market Cap",def:"The total value of all the company's shares combined. It tells you how 'big' a company is. Think of it as the company's price tag."},
+  {term:"YTD Return",def:"Year-To-Date. How much the stock has gone up or down since January 1st of this year."},
+  {term:"52-Week Range",def:"The highest and lowest price the stock hit in the past year. Helps you see where the current price sits in context."},
+  {term:"Analyst Target",def:"The price that professional stock analysts at Wall Street firms think the stock will reach in the next 12 months. It's their best guess, not a guarantee."},
+  {term:"Diversification",def:"Not putting all your eggs in one basket. Spreading your money across different types of investments to reduce risk."},
+  {term:"Earnings",def:"A company's profits. When a company 'reports earnings,' they're telling investors how much money they made (or lost) last quarter."},
+  {term:"Dilution",def:"When a company issues new shares, each existing share becomes a smaller piece of the pie. Like splitting a pizza into more slices — each slice gets smaller."},
+];
+
+let sel = 0, sugTab = "aggressive", isDark = true;
+
+function hc(score){return score>=75?"#4eff91":score>=50?"#ffb74d":"#ff6b6b"}
+function healthEmoji(h){return h==="strong-bullish"?"\u2705 Strong":h==="bullish"?"\u2705 Good":h==="volatile-growth"?"\u26a0\ufe0f Volatile":h==="speculative"?"\ud83d\udea8 Risky":"\ud83d\udea8 High Risk"}
+
+function miniSVG(data,color,w=110,h=40){
+  const mn=Math.min(...data)*.95,mx=Math.max(...data)*1.05,rg=mx-mn||1;
+  const pts=data.map((v,i)=>`${(i/(data.length-1))*w},${h-((v-mn)/rg)*h}`).join(" ");
+  return `<svg width="${w}" height="${h}"><defs><linearGradient id="g${color.replace('#','')}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${color}" stop-opacity=".3"/><stop offset="100%" stop-color="${color}" stop-opacity=".02"/></linearGradient></defs><polygon points="${pts} ${w},${h} 0,${h}" fill="url(#g${color.replace('#','')})"/><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round"/></svg>`;
+}
+
+function pieSVG(){
+  const sectors=[{label:"Space/Telecom",pct:14.3,color:"#448aff"},{label:"Energy",pct:28.6,color:"#ffb74d"},{label:"5G Chips",pct:14.3,color:"#18ffff"},{label:"AI Cloud",pct:14.3,color:"#ce93d8"},{label:"Music/Media",pct:14.3,color:"#f48fb1"},{label:"Biotech",pct:14.3,color:"#4eff91"}];
+  let cum=0;const r=60,cx=80,cy=80;
+  let paths='';
+  sectors.forEach(s=>{
+    const a1=cum*3.6*Math.PI/180,a2=(cum+s.pct)*3.6*Math.PI/180;
+    const la=s.pct>50?1:0;
+    const x1=cx+r*Math.sin(a1),y1=cy-r*Math.cos(a1);
+    const x2=cx+r*Math.sin(a2),y2=cy-r*Math.cos(a2);
+    paths+=`<path d="M${cx},${cy} L${x1},${y1} A${r},${r} 0 ${la},1 ${x2},${y2} Z" fill="${s.color}" stroke="var(--bg)" stroke-width="2"/>`;
+    cum+=s.pct;
+  });
+  let legend = sectors.map(s=>`<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><div style="width:10px;height:10px;border-radius:2px;background:${s.color};flex-shrink:0"></div><span style="font-size:12px;color:#ffffff;font-weight:500">${s.label}</span><span style="font-size:11px;color:#a0aec0">${s.pct}%</span></div>`).join("");
+  return `<div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap"><svg viewBox="0 0 160 160" width="150" height="150">${paths}</svg><div>${legend}</div></div>`;
+}
+
+function render(){
+  const avg=Math.round(S.reduce((a,s)=>a+s.hs,0)/S.length);
+  const grade=avg>=80?"A-":avg>=70?"B+":avg>=60?"B-":avg>=50?"C+":"C-";
+  const gradeColor=avg>=70?"#00e676":avg>=50?"#ff9800":"#ff5252";
+  const avgYtd=(S.reduce((a,s)=>a+s.ytd,0)/S.length).toFixed(1);
+  const best=S.reduce((a,b)=>a.y1>b.y1?a:b);
+  const worst=S.reduce((a,b)=>a.y1<b.y1?a:b);
+  const s=S[sel];
+  const chg=(((s.p-s.pc)/s.pc)*100).toFixed(2);
+  const isUp=parseFloat(chg)>=0;
+  const pos52=((s.p-s.l52)/(s.h52-s.l52))*100;
+  const rangeCtx=pos52>75?"This stock is near its yearly high — it's been on a good run but could be pricey to buy more.":pos52>40?"This stock is in the middle of its yearly range — not at a peak or a bottom.":"This stock is near its yearly low — it's been struggling, but could also mean it's on sale.";
+  // Analyst bar
+  const aMin=Math.min(s.p,s.tgt,s.l52),aMax=Math.max(s.p,s.tgt,s.h52);
+  const aRange=aMax-aMin||1;
+  const youPos=((s.p-aMin)/aRange)*100;
+  const tgtPos=((s.tgt-aMin)/aRange)*100;
+  const tgtDir=s.tgt>=s.p?`Wall Street thinks this could reach $${s.tgt} — that's ${(((s.tgt-s.p)/s.p)*100).toFixed(0)}% higher than today.`:`Wall Street's target is actually below the current price at $${s.tgt}. The stock may have run ahead of expectations.`;
+
+  document.getElementById("app").innerHTML = `
+  <div class="topbar">
+    <div></div>
+    <div class="topbar-right">
+      <button class="toggle-btn" onclick="toggleTheme()">${isDark?'☀️ Light Mode':'🌙 Dark Mode'}</button>
+      <button class="toggle-btn" onclick="window.print()">🖨️ Print</button>
+    </div>
+  </div>
+
+  <div class="welcome">
+    <h1>Welcome, Maureen! 📋</h1>
+    <div class="intro">Think of this as your portfolio's report card. Some of your stocks got A's, some are in detention. Let's walk through each one so you know exactly where things stand — and what to think about next.</div>
+    <div class="date">Analysis as of March 20, 2026 · This is not investment advice — just a helpful overview</div>
+  </div>
+
+  <div class="grade-card">
+    <div class="grade-circle" style="background:${gradeColor}">${grade}</div>
+    <div class="grade-info">
+      <div class="title">Overall Portfolio Grade: ${grade}</div>
+      <div class="desc">Your portfolio leans aggressive — ${S.filter(x=>x.hs<40).length} of your 7 stocks carry serious risk, while ${S.filter(x=>x.hs>=70).length} are in solid shape. The biggest wins are coming from energy (FTI, EE), while the smaller speculative picks (GCTS, LVO, TNXP) have been struggling.</div>
+    </div>
+  </div>
+
+  <div class="overview-grid">
+    ${[{l:"Portfolio Health",v:`${avg}/100`,s:avg>=50?"Moderate":"Needs Attention",c:avg>=50?"#4eff91":"#ffb74d"},
+       {l:"Avg. This Year",v:`${avgYtd}%`,s:parseFloat(avgYtd)>=0?"Overall Positive":"Mixed Results",c:parseFloat(avgYtd)>=0?"#4eff91":"#ff6b6b"},
+       {l:"Best Performer",v:best.t,s:`Up ${best.y1}% this year`,c:"#4eff91"},
+       {l:"Needs Attention",v:worst.t,s:`Down ${Math.abs(worst.y1)}% this year`,c:"#ff6b6b"}
+    ].map(i=>`<div class="ov-card"><div class="ov-label">${i.l}</div><div class="ov-value" style="color:${i.c}">${i.v}</div><div class="ov-sub">${i.s}</div></div>`).join("")}
+  </div>
+
+  <div class="diversification">
+    <h3>How Diversified Are You?</h3>
+    <div class="div-content">
+      ${pieSVG()}
+      <div class="div-text">
+        Your investments are spread across 6 different sectors, which is decent variety. However, most of your picks are in <strong>high-risk, high-reward</strong> categories like space tech, small biotech, and speculative chips. Only your energy stocks (FTI, EE) are in more established industries.<br><br>
+        <strong>Plain English:</strong> You've got variety in WHAT you own, but almost everything is a risky bet. Think of it like having 7 different scratch-off lottery tickets — sure, they're different tickets, but they're all still lottery tickets. Adding something steady like an index fund (VOO) would help balance things out.
+      </div>
+    </div>
+  </div>
+
+  <div class="main-grid">
+    <div>
+      <div class="holdings-label">Your 7 Stocks — Click any to see details →</div>
+      ${S.map((st,i)=>{
+        const ch=(((st.p-st.pc)/st.pc)*100).toFixed(2);
+        const up=parseFloat(ch)>=0;
+        const cc=hc(st.hs);
+        const lastVal=st.hist[st.hist.length-1],firstVal=st.hist[0];
+        const chartNote=lastVal>firstVal?"Trending up over the past year":"Has been declining over the past year";
+        return `<div class="stock-card ${i===sel?'selected':''}" onclick="selectStock(${i})">
+          <div class="card-top">
+            <div><div class="card-ticker">${st.t}</div><div class="card-sector">${st.sec}</div></div>
+            <div class="health-em" style="color:${cc}">${healthEmoji(st.health)}</div>
+          </div>
+          <div class="card-bottom">
+            <div>
+              <div class="card-price">$${st.p.toFixed(2)}</div>
+              <div class="card-change ${up?'up':'down'}">${up?'▲':'▼'} ${ch}%</div>
+            </div>
+            <div>
+              ${miniSVG(st.hist,cc)}
+              <div class="card-chartlabel">${chartNote}</div>
+            </div>
+          </div>
+          <div class="action-badge" style="background:${st.actionColor}22;color:${st.actionColor};border:1px solid ${st.actionColor}44">${st.action}</div>
+        </div>`;
+      }).join("")}
+    </div>
+
+    <div class="detail-panel">
+      <div class="detail-header">
+        <div>
+          <div class="detail-title">${s.t} <span>— ${s.n}</span></div>
+          <div class="detail-analogy">${s.analogy}</div>
+          <div class="detail-simple"><strong>What they do:</strong> ${s.simple} <em>(Trend: ${s.trend})</em></div>
+        </div>
+      </div>
+
+      <div class="metrics-grid">
+        ${[{l:"Company Size",v:s.mc,tip:"Market Cap — the total value of the company. Bigger = more established, smaller = more volatile."},
+           {l:"Price vs Earnings",v:s.pe,tip:"P/E Ratio — how much you're paying for each $1 of profit. N/A means the company isn't profitable yet."},
+           {l:"This Year",v:`${s.ytd>0?"+":""}${s.ytd}%`,tip:"How much this stock has gone up or down since January 1st, 2026."},
+           {l:"Past 12 Months",v:`${s.y1>0?"+":""}${s.y1}%`,tip:"How much this stock has moved over the entire past year."}
+        ].map(m=>{
+          const c=m.v.includes("+")?'#4eff91':m.v.includes("-")?'#ff6b6b':'var(--text1)';
+          return `<div class="metric-box"><div class="tooltip">${m.tip}</div><div class="metric-label">${m.l}</div><div class="metric-value" style="color:${c}">${m.v}</div></div>`;
+        }).join("")}
+      </div>
+
+      <div class="range-section">
+        <div style="font-size:10px;color:var(--text4);text-transform:uppercase;letter-spacing:1px;font-weight:600">52-Week Price Range</div>
+        <div class="range-bar-wrap">
+          <div class="range-fill" style="width:${pos52}%"></div>
+          <div class="range-marker" style="left:${pos52}%"></div>
+        </div>
+        <div class="range-labels"><span>Low: $${s.l52}</span><span style="font-weight:600">Now: $${s.p}</span><span>High: $${s.h52}</span></div>
+        <div class="range-context">${rangeCtx}</div>
+      </div>
+
+      <div class="analyst-visual">
+        <div style="font-size:10px;color:var(--text4);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:2px">Where Wall Street Thinks It's Headed</div>
+        <div class="analyst-bar-wrap">
+          <div class="analyst-you" style="left:${youPos}%"></div>
+          <div class="analyst-target" style="left:${tgtPos}%"></div>
+        </div>
+        <div class="analyst-labels">
+          <span style="color:var(--cyan)">📍 You're here: $${s.p}</span>
+          <span style="color:var(--green)">🎯 Target: $${s.tgt}</span>
+        </div>
+        <div class="analyst-explain">${tgtDir}</div>
+      </div>
+
+      <div class="bw-grid">
+        <div class="bw-box best">
+          <div class="bw-label" style="color:#81c784">Best Case 📈</div>
+          <div class="bw-value" style="color:#4eff91">${s.bestCase.split("→")[0]}</div>
+          <div class="bw-desc" style="color:#c8e6c9">${s.bestCase.split("→")[1]||""}</div>
+        </div>
+        <div class="bw-box worst">
+          <div class="bw-label" style="color:#ff8a80">Worst Case 📉</div>
+          <div class="bw-value" style="color:#ff6b6b">${s.worstCase.split("→")[0]}</div>
+          <div class="bw-desc" style="color:#ffcdd2">${s.worstCase.split("→")[1]||""}</div>
+        </div>
+      </div>
+
+      <div class="split-grid">
+        <div class="gn-box">
+          <div class="gn-label">👍 Good News</div>
+          ${s.gn.map(c=>`<div class="gn-item">${c}</div>`).join("")}
+        </div>
+        <div class="wo-box">
+          <div class="wo-label">👀 Watch Out For</div>
+          ${s.wo.map(r=>`<div class="wo-item">${r}</div>`).join("")}
+        </div>
+      </div>
+
+      <div class="verdict-box">
+        <div class="verdict-label">The Bottom Line</div>
+        <div class="verdict-text">${s.verdict}</div>
+        <div class="verdict-timing">${s.timing}</div>
+        <div class="verdict-action"><span class="action-badge" style="background:${s.actionColor}22;color:${s.actionColor};border:1px solid ${s.actionColor}44;font-size:13px;padding:5px 14px">${s.action}</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="events-section">
+    <h3>📅 What to Watch — Upcoming Events</h3>
+    ${EVENTS.map(e=>`<div class="event-row"><div class="event-date">${e.date}</div><div class="event-ticker">${e.ticker}</div><div class="event-desc">${e.desc}</div></div>`).join("")}
+  </div>
+
+  <div class="suggestions">
+    <h3>💡 Stocks Worth Considering</h3>
+    <div class="tab-buttons">
+      <button class="tab-btn ${sugTab==='aggressive'?'active-a':''}" onclick="switchTab('aggressive')">Match Your Style</button>
+      <button class="tab-btn ${sugTab==='stable'?'active-s':''}" onclick="switchTab('stable')">Steady Stabilizers</button>
+    </div>
+    <div class="suggest-grid">
+      ${SUGG[sugTab].map(sg=>`<div class="suggest-card">
+        <div class="suggest-ticker">${sg.t}</div>
+        <div class="suggest-meta">${sg.n} — ${sg.sec}</div>
+        <div class="suggest-connect">${sg.connect}</div>
+        <div class="suggest-reason">${sg.reason}</div>
+        <span class="suggest-risk" style="background:${sg.riskColor}22;color:${sg.riskColor};border:1px solid ${sg.riskColor}44">Risk: ${sg.risk}</span>
+      </div>`).join("")}
+    </div>
+  </div>
+
+  <div class="advisor-section">
+    <h3>💬 Questions to Ask a Financial Advisor</h3>
+    <div class="advisor-q">"My FTI stock has gone up over 150% — should I sell some to lock in profits, and if so, how much?"</div>
+    <div class="advisor-q">"Three of my stocks (GCTS, LVO, TNXP) are small, risky companies. Is that too much of my portfolio in speculative bets?"</div>
+    <div class="advisor-q">"Should I add an index fund like VOO or SPY to balance out my individual stock picks?"</div>
+    <div class="advisor-q">"TNXP has a real FDA-approved drug now. How do I evaluate if the company can survive long enough to make it profitable?"</div>
+    <div class="advisor-q">"I own CoreWeave (CRWV), which is an AI infrastructure stock. Is AI still a good long-term investment theme?"</div>
+    <div class="advisor-q">"What's a trailing stop-loss and should I set one on my stocks that have big gains?"</div>
+  </div>
+
+  <div class="glossary">
+    <h3>📖 Glossary — What These Terms Mean</h3>
+    <div class="gloss-grid">
+      ${GLOSSARY.map(g=>`<div class="gloss-item"><div class="gloss-term">${g.term}</div><div class="gloss-def">${g.def}</div></div>`).join("")}
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    <div class="label">Important Note</div>
+    <p>This report is meant to help you understand your investments — it's not professional financial advice. Stock prices change every day, and past performance doesn't guarantee future results. Any investment can lose value, including all of the stocks discussed here. Before making any big decisions about buying, selling, or holding stocks, it's always smart to talk to a qualified financial advisor who knows your full financial picture.</p>
+  </div>`;
+}
+
+function selectStock(i){sel=i;render()}
+function switchTab(t){sugTab=t;render()}
+function toggleTheme(){isDark=!isDark;document.body.classList.toggle('light');render()}
+
+render();
+</script>
+</body>
+</html>

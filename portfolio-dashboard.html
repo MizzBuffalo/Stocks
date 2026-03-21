@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio Intelligence Dashboard</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap');
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: #1e2740; border-radius: 2px; }
+body {
+  background: #080c14;
+  color: #e0e0e0;
+  font-family: 'DM Sans', 'Segoe UI', system-ui, sans-serif;
+  padding: 24px 20px;
+  min-height: 100vh;
+}
+
+.header-dot { width: 8px; height: 8px; border-radius: 50%; background: #00e5ff; box-shadow: 0 0 8px #00e5ff; display: inline-block; vertical-align: middle; margin-right: 10px; }
+h1 { display: inline; font-size: 28px; font-weight: 900; letter-spacing: -1px; background: linear-gradient(135deg, #e8eaf6, #5c6bc0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.subtitle { font-size: 12px; color: #546e7a; letter-spacing: 0.5px; margin-top: 4px; }
+
+/* Overview cards */
+.overview-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 24px 0; }
+.overview-card { background: linear-gradient(135deg, #0d1117 0%, #151b28 100%); border: 1px solid #1e2740; border-radius: 10px; padding: 16px 14px; }
+.overview-label { font-size: 10px; color: #5a6a8a; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; }
+.overview-value { font-size: 22px; font-weight: 800; margin: 6px 0; }
+.overview-sub { font-size: 11px; color: #5a6a8a; }
+
+/* Main layout */
+.main-grid { display: grid; grid-template-columns: 380px 1fr; gap: 20px; }
+.holdings-label { font-size: 10px; color: #5a6a8a; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; font-weight: 700; }
+
+/* Stock cards */
+.stock-card { background: linear-gradient(135deg, #0d1117 0%, #131920 100%); border: 1px solid #1a2035; border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.3s ease; position: relative; overflow: hidden; margin-bottom: 8px; }
+.stock-card:hover { border-color: #2962ff55; }
+.stock-card.selected { background: linear-gradient(135deg, #0f1a2e 0%, #162040 100%); border-color: #2962ff; }
+.stock-card.selected::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, #2962ff, #00e5ff); }
+.card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+.card-ticker { font-size: 16px; font-weight: 800; color: #e8eaf6; letter-spacing: 0.5px; }
+.card-sector { font-size: 10px; color: #546e7a; margin-top: 2px; }
+.card-bottom { display: flex; justify-content: space-between; align-items: flex-end; }
+.card-price { font-size: 24px; font-weight: 800; color: #fff; }
+.card-change { font-size: 12px; font-weight: 600; }
+.card-change.up { color: #00e676; }
+.card-change.down { color: #ff5252; }
+
+/* Health badge */
+.health-badge { display: inline-flex; align-items: center; gap: 8px; }
+.health-tag { padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; letter-spacing: 1px; }
+.health-score { font-size: 13px; font-weight: 600; }
+
+/* Detail panel */
+.detail-panel { background: linear-gradient(180deg, #0d1117 0%, #0f1520 100%); border: 1px solid #1a2035; border-radius: 14px; padding: 22px; position: sticky; top: 20px; }
+.detail-title { font-size: 26px; font-weight: 900; color: #e8eaf6; letter-spacing: -0.5px; }
+.detail-title span { font-size: 14px; font-weight: 400; color: #5a6a8a; }
+.detail-desc { font-size: 13px; color: #78909c; line-height: 1.5; margin-top: 6px; max-width: 500px; }
+.detail-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+
+/* Metrics grid */
+.metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+.metric-box { background: #0a0e18; border-radius: 8px; padding: 10px 12px; border: 1px solid #141c2e; }
+.metric-label { font-size: 9px; color: #546e7a; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 4px; }
+.metric-value { font-size: 16px; font-weight: 700; }
+
+/* 52-week range */
+.range-container { margin-bottom: 16px; }
+.range-label { font-size: 10px; color: #546e7a; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 6px; }
+.range-bar { position: relative; height: 8px; background: #141c2e; border-radius: 4px; overflow: visible; }
+.range-fill { position: absolute; top: 0; left: 0; height: 100%; background: linear-gradient(90deg, #2962ff, #00e5ff); border-radius: 4px; transition: width 0.6s ease; }
+.range-marker { position: absolute; top: -6px; width: 4px; height: 20px; background: #fff; border-radius: 2px; transform: translateX(-50%); transition: left 0.6s ease; }
+.range-labels { display: flex; justify-content: space-between; margin-top: 4px; font-size: 10px; }
+.range-labels .low { color: #546e7a; }
+.range-labels .current { color: #b0bec5; font-weight: 600; }
+.range-labels .high { color: #546e7a; }
+
+/* Catalysts / Risks */
+.split-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+.cat-box { background: #091208; border: 1px solid #1b5e20; border-radius: 8px; padding: 12px; }
+.cat-box .label { font-size: 10px; color: #66bb6a; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 8px; font-weight: 700; }
+.cat-item { font-size: 12px; color: #a5d6a7; margin-bottom: 5px; padding-left: 10px; border-left: 2px solid #2e7d32; line-height: 1.4; }
+.risk-box { background: #120808; border: 1px solid #b71c1c33; border-radius: 8px; padding: 12px; }
+.risk-box .label { font-size: 10px; color: #ef5350; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 8px; font-weight: 700; }
+.risk-item { font-size: 12px; color: #ef9a9a; margin-bottom: 5px; padding-left: 10px; border-left: 2px solid #c62828; line-height: 1.4; }
+
+/* Analyst box */
+.analyst-box { background: linear-gradient(135deg, #0d1225 0%, #0f1832 100%); border: 1px solid #1a237e44; border-radius: 8px; padding: 14px; margin-bottom: 12px; }
+.analyst-label { font-size: 10px; color: #5c6bc0; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 6px; font-weight: 700; }
+.analyst-row { display: flex; justify-content: space-between; align-items: center; }
+.analyst-rating { font-size: 14px; font-weight: 700; color: #b0bec5; }
+
+/* Verdict box */
+.verdict-box { background: #0a0e18; border-radius: 8px; padding: 14px; border: 1px solid #1e2740; }
+.verdict-label { font-size: 10px; color: #ff9800; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 6px; font-weight: 700; }
+.verdict-text { font-size: 13px; color: #e0e0e0; line-height: 1.6; margin-bottom: 8px; }
+.verdict-timing { font-size: 12px; color: #ffcc80; font-style: italic; line-height: 1.5; }
+
+/* Risk chart */
+.risk-section { margin-top: 28px; }
+.risk-section h3 { font-size: 18px; font-weight: 800; color: #e8eaf6; margin-bottom: 12px; }
+.risk-bars { display: flex; gap: 6px; align-items: flex-end; height: 140px; padding: 0 10px; }
+.risk-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.risk-bar-score { font-size: 10px; font-weight: 600; }
+.risk-bar { width: 100%; max-width: 50px; border-radius: 4px 4px 0 0; transition: height 0.8s ease; }
+.risk-bar-ticker { font-size: 10px; color: #b0bec5; font-weight: 700; }
+.risk-legend { display: flex; justify-content: space-between; margin-top: 8px; padding: 0 10px; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 10px; color: #5a6a8a; }
+.legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+
+/* Suggestions */
+.suggestions { margin-top: 28px; }
+.suggestions h3 { font-size: 18px; font-weight: 800; color: #e8eaf6; margin-bottom: 12px; }
+.tab-buttons { display: flex; gap: 8px; margin-bottom: 14px; }
+.tab-btn { background: transparent; color: #5a6a8a; border: 1px solid #1e2740; border-radius: 6px; padding: 6px 16px; font-size: 12px; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; font-family: inherit; }
+.tab-btn.active-agg { background: #ff5252; color: #fff; border-color: transparent; }
+.tab-btn.active-stab { background: #2962ff; color: #fff; border-color: transparent; }
+.suggest-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.suggest-card { background: linear-gradient(135deg, #0d1117, #131f2e); border: 1px solid #1e2740; border-radius: 10px; padding: 14px; }
+.suggest-ticker { font-size: 16px; font-weight: 800; color: #fff; }
+.suggest-meta { font-size: 11px; color: #546e7a; margin-bottom: 6px; }
+.suggest-reason { font-size: 12px; color: #b0bec5; line-height: 1.5; }
+
+/* Disclaimer */
+.disclaimer { margin-top: 32px; padding: 16px; background: #0a0e18; border-radius: 10px; border: 1px solid #1e2740; }
+.disclaimer .label { font-size: 10px; color: #5a6a8a; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; font-weight: 700; }
+.disclaimer p { font-size: 11px; color: #546e7a; line-height: 1.7; }
+
+/* Gauge */
+.gauge-container { width: 100px; }
+
+/* Empty state */
+.empty-detail { display: flex; align-items: center; justify-content: center; height: 300px; color: #5a6a8a; font-size: 14px; }
+
+/* Animations */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.fade-in { animation: fadeIn 0.4s ease; }
+
+/* Responsive */
+@media (max-width: 900px) {
+  .main-grid { grid-template-columns: 1fr; }
+  .overview-grid { grid-template-columns: repeat(2, 1fr); }
+  .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+  .suggest-grid { grid-template-columns: 1fr; }
+  .detail-panel { position: static; }
+}
+</style>
+</head>
+<body>
+
+<div>
+  <div style="margin-bottom: 24px;">
+    <div><span class="header-dot"></span><h1>Portfolio Intelligence</h1></div>
+    <p class="subtitle">7 Stocks · Analysis as of March 20, 2026 · Not investment advice</p>
+  </div>
+
+  <div class="overview-grid" id="overview"></div>
+  <div class="main-grid">
+    <div>
+      <div class="holdings-label">Holdings</div>
+      <div id="stock-list"></div>
+    </div>
+    <div class="detail-panel" id="detail-panel">
+      <div class="empty-detail">← Select a stock to see detailed analysis</div>
+    </div>
+  </div>
+  <div class="risk-section" id="risk-section"></div>
+  <div class="suggestions" id="suggestions"></div>
+  <div class="disclaimer">
+    <div class="label">Important Disclaimer</div>
+    <p>This analysis is for informational and educational purposes only. It does not constitute investment advice, a recommendation, or a solicitation to buy or sell any securities. Stock prices, analyst targets, and projections can change rapidly. Past performance does not guarantee future results. All investments carry risk, including the potential loss of principal. Please consult with a qualified financial advisor before making any investment decisions.</p>
+  </div>
+</div>
+
+<script>
+const STOCKS = [
+  { ticker:"ASTS", name:"AST SpaceMobile", sector:"Space / Telecom", price:94.09, prevClose:90.74, weekHigh52:129.89, weekLow52:18.22, marketCap:"27.1B", pe:"N/A", analystRating:"Neutral", analystTarget:88.53, description:"Space-based cellular broadband for smartphones. BlueBird satellite constellation.", catalysts:["TELUS partnership for Canada","$30M U.S. Space Development Agency contract","Revenue target ~$1B by 2027"], risks:["Pre-revenue stage, heavy cash burn","Satellite launch execution risk","Short interest ~25%"], health:"bullish", healthScore:72, ytdReturn:1.79, oneYearReturn:228, history:[18.22,28,42,55,75,95,129,116,90,77,87,94], verdict:"HOLD — Explosive growth potential but volatile. Space-based broadband is a game-changer if execution follows.", exitTiming:"Consider trimming above $120. Core hold for 2027+ revenue ramp." },
+  { ticker:"FTI", name:"TechnipFMC", sector:"Energy Services", price:65.13, prevClose:64.38, weekHigh52:68.29, weekLow52:22.12, marketCap:"26.5B", pe:"27.2", analystRating:"Strong Buy", analystTarget:52.00, description:"Global leader in subsea oilfield services & deep-water energy infrastructure.", catalysts:["All-time high price reached Mar 2026","Strong backlog shifting to higher-margin iEPCI","152% total return over past year"], risks:["Oil price sensitivity","Trading above analyst targets","Offshore wind execution issues"], health:"strong-bullish", healthScore:88, ytdReturn:34.1, oneYearReturn:152, history:[22,26,30,33,36,38,42,48,52,58,62,65], verdict:"STRONG — Best performer in portfolio. Fundamentals are solid with growing backlog.", exitTiming:"Currently above analyst targets. Consider partial profit-taking; set trailing stop at $55." },
+  { ticker:"EE", name:"Excelerate Energy", sector:"LNG / Energy Infra", price:33.61, prevClose:34.36, weekHigh52:43.18, weekLow52:21.28, marketCap:"4.6B", pe:"28.1", analystRating:"Moderate Buy", analystTarget:39.00, description:"LNG solutions provider with floating regasification units & gas-to-power infrastructure.", catalysts:["Record 2025 EBITDA of $449M","2026 guidance: $515-$545M EBITDA","Iraq expansion & LNG supply deals"], risks:["LNG price volatility","Geopolitical exposure (Iraq)","Recent gap-down from $42 highs"], health:"bullish", healthScore:75, ytdReturn:19.6, oneYearReturn:58, history:[21,22,23,24,26,25,27,28,30,35,43,34], verdict:"SOLID — Growing LNG infrastructure play with strong cash generation.", exitTiming:"Healthy hold. Upside to $39-44 analyst range. Watch for re-test of $43 high." },
+  { ticker:"GCTS", name:"GCT Semiconductor", sector:"Semiconductors / 5G", price:1.17, prevClose:1.18, weekHigh52:2.47, weekLow52:0.90, marketCap:"85M", pe:"-1.6", analystRating:"Strong Buy", analystTarget:4.00, description:"Fabless 5G/4G LTE chipset designer for IoT, CPE, and satellite connectivity.", catalysts:["5G chipset commercial shipments begun","Skylo satellite partnership","MWC 2026: 5G-to-Space & IoT advances"], risks:["Revenue cratered: $3M in 2025 vs $9M prior year","Negative margins, cash burn","Micro-cap with high dilution risk"], health:"speculative", healthScore:32, ytdReturn:-17, oneYearReturn:-52, history:[2.47,2.10,1.80,1.60,1.40,1.20,1.10,0.94,1.05,1.24,1.20,1.17], verdict:"HIGH RISK — Speculative 5G bet. Revenue collapse is concerning but analyst targets suggest 200%+ upside.", exitTiming:"Lottery ticket. If holding, wait for Q1 2026 earnings (Mar 25) for clarity." },
+  { ticker:"CRWV", name:"CoreWeave", sector:"AI Cloud Infrastructure", price:80.66, prevClose:82.82, weekHigh52:187.00, weekLow52:33.52, marketCap:"41.6B", pe:"-31.7", analystRating:"Buy", analystTarget:120.79, description:"AI cloud infrastructure — GPU compute, data centers, serving NVIDIA's ecosystem.", catalysts:["Revenue up 168% YoY to $5.13B","NVIDIA HGX B300 availability","Partnerships: Cline, Perplexity, CrowdStrike"], risks:["Still unprofitable: -$1.2B losses","$100B+ funding deficit projected thru 2030","Big Tech building own infrastructure"], health:"volatile-growth", healthScore:58, ytdReturn:-2.4, oneYearReturn:99, history:[40,65,100,140,187,170,150,130,105,95,77,81], verdict:"HIGH CONVICTION GROWTH — AI infrastructure backbone. Massive revenue growth but heavy losses.", exitTiming:"Long-term hold for AI thesis believers. Consider adding below $70." },
+  { ticker:"LVO", name:"LiveOne", sector:"Digital Music / Media", price:4.70, prevClose:4.50, weekHigh52:12.00, weekLow52:2.50, marketCap:"52M", pe:"N/A", analystRating:"Buy", analystTarget:17.50, description:"Digital music streaming, live events, podcasting platform (LiveOne, PodcastOne, Slacker).", catalysts:["Multi-year Merlin licensing deal","AI initiatives reducing headcount (350→84)","VIZIO Smart TV app launch"], risks:["Consistent operating losses","Micro-cap with thin trading","Missing earnings estimates"], health:"speculative", healthScore:35, ytdReturn:-38, oneYearReturn:-55, history:[10.5,9,8,7,6.5,5.5,5,4,3,3.5,4,4.7], verdict:"SPECULATIVE — Interesting AI pivot but losses persist. Analyst targets imply huge upside if turnaround works.", exitTiming:"Speculative hold. Watch for profitability signals in next 2 quarters." },
+  { ticker:"TNXP", name:"Tonix Pharmaceuticals", sector:"Biotech / Pharma", price:13.24, prevClose:13.41, weekHigh52:69.96, weekLow52:12.80, marketCap:"169M", pe:"N/A", analystRating:"Buy", analystTarget:70.00, description:"Commercial-stage biotech. TONMYA for fibromyalgia (first new FDA approval in 15+ years). CNS pipeline.", catalysts:["TONMYA launched Nov 2025: ~4,200 prescriptions","~1,500 prescribers onboarded","Uplisted to Nasdaq Global Select Market"], risks:["$130M annual losses","Stock down ~80% from 52-week high","Heavy dilution history"], health:"high-risk-catalyst", healthScore:40, ytdReturn:-32, oneYearReturn:-78, history:[60,55,50,45,40,35,30,25,20,18,15,13], verdict:"DEEP VALUE or VALUE TRAP — TONMYA is real revenue but commercial ramp is slow vs burn rate.", exitTiming:"Critical watch zone. If TONMYA scripts accelerate → potential multi-bagger. Set stop-loss at $10." }
+];
+
+const SUGGESTIONS = {
+  aggressive: [
+    { ticker:"RKLB", name:"Rocket Lab", sector:"Space", reason:"Pairs with ASTS thesis. Satellite launch provider with growing revenue." },
+    { ticker:"IONQ", name:"IonQ", sector:"Quantum Computing", reason:"Frontier tech like her space/5G picks. Quantum is next wave." },
+    { ticker:"NBIS", name:"Nebius Group", sector:"AI Infrastructure", reason:"CoreWeave competitor. NVIDIA just invested $2B." },
+  ],
+  stable: [
+    { ticker:"LNG", name:"Cheniere Energy", sector:"LNG", reason:"Blue-chip version of her EE play. Market leader in U.S. LNG exports." },
+    { ticker:"CRWD", name:"CrowdStrike", sector:"Cybersecurity", reason:"Growth + profitability path. Iran conflict boosting demand." },
+    { ticker:"VOO", name:"Vanguard S&P 500 ETF", sector:"Index Fund", reason:"Portfolio anchor. Diversification against her concentrated bets." },
+  ]
+};
+
+const healthConfig = {
+  "strong-bullish": { color:"#00e676", bg:"#00e67622", label:"STRONG" },
+  "bullish": { color:"#4caf50", bg:"#4caf5022", label:"BULLISH" },
+  "volatile-growth": { color:"#ff9800", bg:"#ff980022", label:"VOLATILE" },
+  "speculative": { color:"#ff5252", bg:"#ff525222", label:"SPECULATIVE" },
+  "high-risk-catalyst": { color:"#ff1744", bg:"#ff174422", label:"HIGH RISK" },
+};
+
+let selectedIdx = 0;
+let suggestTab = "aggressive";
+
+function getHealthColor(score) {
+  return score >= 75 ? "#00e676" : score >= 50 ? "#ff9800" : "#ff5252";
+}
+
+function miniChartSVG(data, color, w=120, h=45) {
+  const min = Math.min(...data) * 0.95, max = Math.max(...data) * 1.05;
+  const range = max - min || 1;
+  const pts = data.map((v,i) => `${(i/(data.length-1))*w},${h-((v-min)/range)*h}`).join(" ");
+  const area = pts + ` ${w},${h} 0,${h}`;
+  const id = `g${color.replace('#','')}`;
+  return `<svg width="${w}" height="${h}" style="display:block"><defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${color}" stop-opacity="0.3"/><stop offset="100%" stop-color="${color}" stop-opacity="0.02"/></linearGradient></defs><polygon points="${area}" fill="url(#${id})"/><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round"/></svg>`;
+}
+
+function gaugeSVG(score) {
+  const r=38, circ=Math.PI*r, offset=circ-(score/100)*circ;
+  const color = score>=75?"#00e676":score>=50?"#ff9800":"#ff5252";
+  return `<svg width="100" height="60" viewBox="0 0 100 60"><path d="M 10 55 A 40 40 0 0 1 90 55" fill="none" stroke="#1a1f2e" stroke-width="8" stroke-linecap="round"/><path d="M 10 55 A 40 40 0 0 1 90 55" fill="none" stroke="${color}" stroke-width="8" stroke-linecap="round" stroke-dasharray="${circ}" stroke-dashoffset="${offset}" style="transition:stroke-dashoffset 1s ease"/><text x="50" y="50" text-anchor="middle" fill="${color}" font-size="18" font-weight="800">${score}</text></svg>`;
+}
+
+function renderOverview() {
+  const avg = Math.round(STOCKS.reduce((a,s)=>a+s.healthScore,0)/STOCKS.length);
+  const avgYtd = (STOCKS.reduce((a,s)=>a+s.ytdReturn,0)/STOCKS.length).toFixed(1);
+  const best = STOCKS.reduce((a,b)=>a.oneYearReturn>b.oneYearReturn?a:b);
+  const worst = STOCKS.reduce((a,b)=>a.oneYearReturn<b.oneYearReturn?a:b);
+  const items = [
+    {l:"Portfolio Health",v:`${avg}/100`,s:avg>=50?"Moderate":"Caution",c:avg>=50?"#4caf50":"#ff9800"},
+    {l:"Avg YTD Return",v:`${avgYtd}%`,s:parseFloat(avgYtd)>=0?"Positive":"Negative",c:parseFloat(avgYtd)>=0?"#00e676":"#ff5252"},
+    {l:"Top Performer (1Y)",v:best.ticker,s:`+${best.oneYearReturn}%`,c:"#00e676"},
+    {l:"Weakest (1Y)",v:worst.ticker,s:`${worst.oneYearReturn}%`,c:"#ff5252"},
+  ];
+  document.getElementById("overview").innerHTML = items.map(i=>`
+    <div class="overview-card">
+      <div class="overview-label">${i.l}</div>
+      <div class="overview-value" style="color:${i.c}">${i.v}</div>
+      <div class="overview-sub">${i.s}</div>
+    </div>`).join("");
+}
+
+function renderStockList() {
+  document.getElementById("stock-list").innerHTML = STOCKS.map((s,i)=>{
+    const change = (((s.price-s.prevClose)/s.prevClose)*100).toFixed(2);
+    const isUp = parseFloat(change)>=0;
+    const hc = healthConfig[s.health];
+    const chartColor = getHealthColor(s.healthScore);
+    return `<div class="stock-card ${i===selectedIdx?'selected':''}" onclick="selectStock(${i})">
+      <div class="card-top">
+        <div><div class="card-ticker">${s.ticker}</div><div class="card-sector">${s.sector}</div></div>
+        <div class="health-badge">
+          <span class="health-tag" style="background:${hc.bg};color:${hc.color};border:1px solid ${hc.color}44">${hc.label}</span>
+          <span class="health-score" style="color:${hc.color}">${s.healthScore}/100</span>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <div>
+          <div class="card-price">$${s.price.toFixed(2)}</div>
+          <div class="card-change ${isUp?'up':'down'}">${isUp?'▲':'▼'} ${change}%</div>
+        </div>
+        ${miniChartSVG(s.history, chartColor)}
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function renderDetail() {
+  const s = STOCKS[selectedIdx];
+  const range52 = s.weekHigh52 - s.weekLow52;
+  const pos = ((s.price-s.weekLow52)/range52)*100;
+  const upside = (((s.analystTarget-s.price)/s.price)*100).toFixed(1);
+  const upsideColor = parseFloat(upside)>=0?"#00e676":"#ff5252";
+
+  document.getElementById("detail-panel").innerHTML = `<div class="fade-in">
+    <div class="detail-header">
+      <div>
+        <div class="detail-title">${s.ticker} <span>— ${s.name}</span></div>
+        <div class="detail-desc">${s.description}</div>
+      </div>
+      <div class="gauge-container">${gaugeSVG(s.healthScore)}</div>
+    </div>
+
+    <div class="metrics-grid">
+      ${[{l:"Market Cap",v:s.marketCap},{l:"P/E Ratio",v:s.pe},{l:"YTD Return",v:`${s.ytdReturn>0?"+":""}${s.ytdReturn}%`},{l:"1Y Return",v:`${s.oneYearReturn>0?"+":""}${s.oneYearReturn}%`}].map(m=>{
+        const c = m.v.includes("+")?'#00e676':m.v.includes("-")?'#ff5252':'#b0bec5';
+        return `<div class="metric-box"><div class="metric-label">${m.l}</div><div class="metric-value" style="color:${c}">${m.v}</div></div>`;
+      }).join("")}
+    </div>
+
+    <div class="range-container">
+      <div class="range-label">52-Week Range</div>
+      <div class="range-bar">
+        <div class="range-fill" style="width:${pos}%"></div>
+        <div class="range-marker" style="left:${pos}%"></div>
+      </div>
+      <div class="range-labels">
+        <span class="low">$${s.weekLow52}</span>
+        <span class="current">Current: $${s.price}</span>
+        <span class="high">$${s.weekHigh52}</span>
+      </div>
+    </div>
+
+    <div class="split-grid">
+      <div class="cat-box">
+        <div class="label">Catalysts & Positives</div>
+        ${s.catalysts.map(c=>`<div class="cat-item">${c}</div>`).join("")}
+      </div>
+      <div class="risk-box">
+        <div class="label">Risks & Concerns</div>
+        ${s.risks.map(r=>`<div class="risk-item">${r}</div>`).join("")}
+      </div>
+    </div>
+
+    <div class="analyst-box">
+      <div class="analyst-label">Analyst Consensus</div>
+      <div class="analyst-row">
+        <span class="analyst-rating">${s.analystRating}</span>
+        <span style="font-size:13px;color:${upsideColor}">Target: $${s.analystTarget} (${upside>0?"+":""}${upside}%)</span>
+      </div>
+    </div>
+
+    <div class="verdict-box">
+      <div class="verdict-label">Verdict & Timing</div>
+      <div class="verdict-text">${s.verdict}</div>
+      <div class="verdict-timing">${s.exitTiming}</div>
+    </div>
+  </div>`;
+}
+
+function renderRisk() {
+  document.getElementById("risk-section").innerHTML = `
+    <h3>Portfolio Risk Distribution</h3>
+    <div class="risk-bars">
+      ${STOCKS.map(s=>{
+        const c = getHealthColor(s.healthScore);
+        return `<div class="risk-bar-col">
+          <span class="risk-bar-score" style="color:${c}">${s.healthScore}</span>
+          <div class="risk-bar" style="height:${s.healthScore*1.2}px;background:linear-gradient(180deg,${c},${c}44)"></div>
+          <span class="risk-bar-ticker">${s.ticker}</span>
+        </div>`;
+      }).join("")}
+    </div>
+    <div class="risk-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#00e676"></div>Strong (75+)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ff9800"></div>Moderate (40-74)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ff5252"></div>High Risk (<40)</div>
+    </div>`;
+}
+
+function renderSuggestions() {
+  const list = SUGGESTIONS[suggestTab];
+  document.getElementById("suggestions").innerHTML = `
+    <h3>Stock Suggestions Based on Her Profile</h3>
+    <div class="tab-buttons">
+      <button class="tab-btn ${suggestTab==='aggressive'?'active-agg':''}" onclick="switchTab('aggressive')">MATCH HER STYLE</button>
+      <button class="tab-btn ${suggestTab==='stable'?'active-stab':''}" onclick="switchTab('stable')">STABILIZERS</button>
+    </div>
+    <div class="suggest-grid">
+      ${list.map(s=>`<div class="suggest-card">
+        <div class="suggest-ticker">${s.ticker}</div>
+        <div class="suggest-meta">${s.name} — ${s.sector}</div>
+        <div class="suggest-reason">${s.reason}</div>
+      </div>`).join("")}
+    </div>`;
+}
+
+function selectStock(i) { selectedIdx = i; renderStockList(); renderDetail(); }
+function switchTab(t) { suggestTab = t; renderSuggestions(); }
+
+// Initial render
+renderOverview();
+renderStockList();
+renderDetail();
+renderRisk();
+renderSuggestions();
+</script>
+</body>
+</html>
