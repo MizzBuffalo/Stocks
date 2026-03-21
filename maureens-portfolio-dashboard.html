@@ -9,7 +9,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#080c14;--bg2:#0d1117;--card:#151b28;--border:#1e2740;
-  --text1:#ffffff;--text2:#c5cdd8;--text3:#a0aec0;--text4:#8b9dc3;
+  --text1:#ffffff;--text2:#c5cdd8;--text3:#a0aec0;--text4:#a0aec0;
   --green:#00e676;--orange:#ffb74d;--red:#ff6b6b;--blue:#448aff;--cyan:#18ffff;
   --card-hover:#162040;--tooltip-bg:#1a2440;
 }
@@ -121,12 +121,12 @@ body{background:var(--bg);color:var(--text1);font-family:'DM Sans',system-ui,san
 
 /* Good news / Watch out */
 .split-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
-.gn-box{background:#0a1a0e;border:1px solid #2e7d32;border-radius:8px;padding:12px}
+.gn-box{background:#0a1a0e;border:1px solid #2e7d32;border-radius:8px;padding:12px;overflow:hidden}
 .gn-label{font-size:10px;color:#81c784;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700}
-.gn-item{font-size:12px;color:#c8e6c9;margin-bottom:4px;padding-left:10px;border-left:2px solid #4caf50;line-height:1.4}
-.wo-box{background:#1a0a0a;border:1px solid #c6282855;border-radius:8px;padding:12px}
+.gn-item{font-size:12px;color:#c8e6c9;margin-bottom:4px;padding-left:10px;border-left:2px solid #4caf50;line-height:1.4;overflow-wrap:break-word}
+.wo-box{background:#1a0a0a;border:1px solid #c6282855;border-radius:8px;padding:12px;overflow:hidden}
 .wo-label{font-size:10px;color:#ff8a80;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700}
-.wo-item{font-size:12px;color:#ffcdd2;margin-bottom:4px;padding-left:10px;border-left:2px solid #ef5350;line-height:1.4}
+.wo-item{font-size:12px;color:#ffcdd2;margin-bottom:4px;padding-left:10px;border-left:2px solid #ef5350;line-height:1.4;overflow-wrap:break-word}
 
 /* Verdict */
 .verdict-box{background:var(--bg);border-radius:8px;padding:14px;border:1px solid var(--border);margin-bottom:10px}
@@ -179,26 +179,30 @@ body{background:var(--bg);color:var(--text1);font-family:'DM Sans',system-ui,san
 
 /* Print */
 @media print{
-  body{background:#fff!important;color:#111!important;padding:10px}
-  .topbar-right,.toggle-btn{display:none!important}
-  .stock-card,.detail-panel,.welcome,.grade-card,.overview-grid,.ov-card,.diversification,.events-section,.suggestions,.advisor-section,.glossary,.disclaimer,.suggest-card,.metric-box,.gn-box,.wo-box,.verdict-box,.analyst-visual,.bw-box,.bw-box.best,.bw-box.worst,.gloss-item,.event-row{background:#fff!important;border-color:#ddd!important;color:#111!important}
-  .card-ticker,.card-price,.detail-title,.ov-value,.grade-info .title,.suggest-ticker,.gloss-term,.verdict-text,.metric-value,.event-ticker,.bw-value{color:#111!important}
-  .card-sector,.card-chartlabel,.ov-label,.ov-sub,.detail-simple,.detail-analogy,.range-context,.analyst-explain,.verdict-timing,.suggest-connect,.suggest-reason,.advisor-q,.gloss-def,.disclaimer p,.grade-info .desc,.div-text,.event-desc,.event-date,.suggest-meta,.metric-label,.range-labels,.range-labels span,.bw-label,.bw-desc,.gn-label,.gn-item,.wo-label,.wo-item,.health-em,.action-badge,.analyst-labels span,.verdict-label{color:#444!important;-webkit-text-fill-color:#444!important}
+  body{background:#fff!important;color:#111!important;padding:10px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .topbar-right,.toggle-btn,.tab-buttons{display:none!important}
+  *{-webkit-text-fill-color:initial!important;color-adjust:exact}
+  .stock-card,.detail-panel,.welcome,.grade-card,.overview-grid,.ov-card,.diversification,.events-section,.suggestions,.advisor-section,.glossary,.disclaimer,.suggest-card,.metric-box,.gn-box,.wo-box,.verdict-box,.analyst-visual,.bw-box,.bw-box.best,.bw-box.worst,.gloss-item,.event-row,.grade-circle{background:#fff!important;border-color:#ddd!important;color:#111!important}
+  .card-ticker,.card-price,.detail-title,.ov-value,.grade-info .title,.suggest-ticker,.gloss-term,.verdict-text,.metric-value,.event-ticker,.bw-value,.grade-circle{color:#111!important}
+  .card-sector,.card-chartlabel,.ov-label,.ov-sub,.detail-simple,.detail-analogy,.range-context,.analyst-explain,.verdict-timing,.suggest-connect,.suggest-reason,.advisor-q,.gloss-def,.disclaimer p,.grade-info .desc,.div-text,.event-desc,.suggest-meta,.metric-label,.range-labels,.range-labels span,.bw-label,.bw-desc,.gn-label,.gn-item,.wo-label,.wo-item,.health-em,.action-badge,.analyst-labels,.analyst-labels span,.verdict-label,.suggest-risk,.welcome .date,.welcome .intro,.holdings-label,.event-date{color:#444!important;-webkit-text-fill-color:#444!important}
   h1,h3{-webkit-text-fill-color:#111!important;color:#111!important}
-  *{-webkit-text-fill-color:initial!important}
   .main-grid{grid-template-columns:1fr!important}
-  .detail-panel{position:static!important}
+  .detail-panel{position:static!important;max-height:none!important;overflow:visible!important}
   .suggest-grid{grid-template-columns:1fr 1fr!important}
   .range-fill{background:#888!important}
   .analyst-you,.analyst-target,.range-marker{background:#333!important}
-  svg path{stroke:#fff!important}
+  svg path{stroke:#555!important}
+  svg polyline{stroke:#555!important}
+  .action-badge,.suggest-risk{background:#f0f0f0!important;border-color:#ccc!important;color:#333!important;-webkit-text-fill-color:#333!important}
+  .pie-legend-dot{border:1px solid #999!important}
+  .div-content span{color:#333!important;-webkit-text-fill-color:#333!important}
 }
 
 @media(max-width:1024px){
   .main-grid{grid-template-columns:1fr}.detail-panel{position:static}
 }
 @media(max-width:768px){
-  .overview-grid{grid-template-columns:repeat(2,1fr)}.metrics-grid{grid-template-columns:repeat(2,1fr)}.suggest-grid{grid-template-columns:1fr}.gloss-grid{grid-template-columns:1fr}.split-grid{grid-template-columns:1fr}.bw-grid{grid-template-columns:1fr}
+  .overview-grid{grid-template-columns:1fr}.metrics-grid{grid-template-columns:1fr}.suggest-grid{grid-template-columns:1fr}.gloss-grid{grid-template-columns:1fr}.split-grid{grid-template-columns:1fr}.bw-grid{grid-template-columns:1fr}
 }
 </style>
 </head>
